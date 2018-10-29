@@ -1,0 +1,23 @@
+{
+  "mode": "all",
+  "policyRule": {
+    "if": {
+      "not": {
+        "field": "name",
+        "like": "[parameters('namePattern')]"
+      }
+    },
+    "then": {
+      "effect": "audit"
+    }
+  },
+  "parameters": {
+    "namePattern": {
+      "type": "String",
+      "metadata": {
+        "displayName": "namePattern",
+        "description": "Wzor - mozliwosci uzycia znakow"
+      }
+    }
+  }
+}
