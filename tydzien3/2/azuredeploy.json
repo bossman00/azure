@@ -1,0 +1,344 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "bossVNet",
+      "metadata": {
+        "description": "VNet name"
+      }
+    },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "Address prefix"
+      }
+    },
+    "networkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "bossnsg",
+      "metadata": {
+        "description": "Network Security Group Name"
+      }
+    },
+    "dnsPrefix1": {
+      "type": "string",
+      "defaultValue": "bossarm1",
+      "metadata": {
+        "description": "Subnet 1 DNS Prefix"
+      }
+    },
+    "subnet1Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "Subnet 1 Prefix"
+      }
+    },
+    "subnet1Name": {
+      "type": "string",
+      "defaultValue": "bossSubnet1",
+      "metadata": {
+        "description": "Subnet 1 Name"
+      }
+    },
+    "publicIPName1": {
+      "type": "string",
+      "defaultValue": "bossPublicIPAddress1",
+      "metadata": {
+        "description": "Subnet 1 Public IP Name"
+      }
+    },
+    "nic1Name": {
+      "type": "string",
+      "defaultValue": "bossNetworkInterface1",
+      "metadata": {
+        "description": "Subnet Network Interface 1 Name"
+      }
+    },
+    "ipConfig1Name": {
+      "type": "string",
+      "defaultValue": "bossipconfig1",
+      "metadata": {
+        "description": "IP Configuration Subnet 1 Name"
+      }
+    },
+    "vm1Name": {
+      "type": "string",
+      "defaultValue": "bossVM1",
+      "metadata": {
+        "description": "Virtual Machine 1 Name"
+      }
+    },
+    "dnsPrefix2": {
+      "type": "string",
+      "defaultValue": "bossarm2",
+      "metadata": {
+        "description": "Subnet 2 DNS Prefix"
+      }
+    },
+    "subnet2Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24",
+      "metadata": {
+        "description": "Subnet 2 Prefix"
+      }
+    },
+    "subnet2Name": {
+      "type": "string",
+      "defaultValue": "bossSubnet2",
+      "metadata": {
+        "description": "Subnet 2 Name"
+      }
+    },
+    "publicIPName2": {
+      "type": "string",
+      "defaultValue": "bossPublicIPAddress2",
+      "metadata": {
+        "description": "Subnet 2 Public IP Name"
+      }
+    },
+    "nic2Name": {
+      "type": "string",
+      "defaultValue": "bossNetworkInterface2",
+      "metadata": {
+        "description": "Subnet Network Interface 2 Name"
+      }
+    },
+    "ipConfig2Name": {
+      "type": "string",
+      "defaultValue": "bossipconfig2",
+      "metadata": {
+        "description": "IP Configuration Subnet 2 Name"
+      }
+    },
+    "vm2Name": {
+      "type": "string",
+      "defaultValue": "bossVM2",
+      "metadata": {
+        "description": "Virtual Machine 2 Name"
+      }
+    },    
+    "vmAdminUserName": {
+      "type": "string",
+      "metadata": {
+        "description": "Virtual Machine 1 Admin User Name"
+      }
+    },
+    "vmAdminUserPass": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Virtual Machine 1 Admin User Pass"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    }
+  },
+  "variables": {
+    "pubIP1Ref": "[resourceId('Microsoft.Network/publicIPAddresses/',parameters('publicIPName1'))]",
+    "pubIP2Ref": "[resourceId('Microsoft.Network/publicIPAddresses/',parameters('publicIPName2'))]",
+    "nsgRef": "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+    "nsgDeploy": "[concat('Microsoft.Resources/deployments/','bossnsgDeploy')]",
+    "vNetRef": "[resourceId('Microsoft.Network/virtualNetworks/', parameters('vnetName'))]",
+    "subnet1Ref": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnet1Name'))]",
+    "subnet2Ref": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnet2Name'))]",
+    "nic1Ref": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nic1Name'))]",
+    "nic2Ref": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nic2Name'))]"
+  },
+  "resources": [
+    {
+      "name": "bossnsgDeploy",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "contentVersion": "1.0.0.0",
+          "uri": "https://raw.githubusercontent.com/bossman00/azure/master/tydzien3/2/nsg.json"
+        },
+        "parameters": {
+          "networkSecurityGroupName": {
+            "value": "[parameters('networkSecurityGroupName')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2018-06-01",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('vnetName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[variables('nsgDeploy')]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet1Prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgRef')]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('subnet2Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet2Prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('publicIPName1')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsPrefix1')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('publicIPName2')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsPrefix2')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[parameters('nic1Name')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[variables('pubIP1Ref')]",
+        "[variables('vNetRef')]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[parameters('ipConfig1Name')]",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[variables('pubIP1Ref')]"
+              },
+              "subnet": {
+                "id": "[variables('subnet1Ref')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[parameters('nic2Name')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[variables('pubIP2Ref')]",
+        "[variables('vNetRef')]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[parameters('ipConfig2Name')]",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[variables('pubIP2Ref')]"
+              },
+              "subnet": {
+                "id": "[variables('subnet2Ref')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "bossvmDeploy1",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "contentVersion": "1.0.0.0",
+          "uri": "https://raw.githubusercontent.com/bossman00/azure/master/tydzien3/2/vm.json"
+        },
+        "parameters": {
+          "vmName": {
+            "value": "[parameters('vm1Name')]"
+          },
+          "vmAdminUserName": {
+            "value": "[parameters('vmAdminUserName')]"
+          },
+          "vmAdminPass": {
+            "value": "[parameters('vmAdminUserPass')]"
+          },
+          "vmNetworkInterfaceName": {
+            "value": "[variables('nic1Ref')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[parameters('nic1Name')]"
+      ]
+    },
+    {
+      "name": "bossvmDeploy2",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "contentVersion": "1.0.0.0",
+          "uri": "https://raw.githubusercontent.com/bossman00/azure/master/tydzien3/2/vm.json"
+        },
+        "parameters": {
+          "vmName": {
+            "value": "[parameters('vm2Name')]"
+          },
+          "vmAdminUserName": {
+            "value": "[parameters('vmAdminUserName')]"
+          },
+          "vmAdminPass": {
+            "value": "[parameters('vmAdminUserPass')]"
+          },
+          "vmNetworkInterfaceName": {
+            "value": "[variables('nic2Ref')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[parameters('nic2Name')]"
+      ]
+    }
+  ]
+}
