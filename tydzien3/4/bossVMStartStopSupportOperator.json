@@ -1,0 +1,17 @@
+{
+    "Name": "VM Start Stop Support Operator",
+    "IsCustom": true,
+    "Description": "TYDZIEN3.3 Zbuduj najprostrza wlasna role RBAC, która pozwala uzytkownikowi uruchomic maszyne, zatrzymac ja i zglosic zgloszenie do supportu przez Portal Azure",
+    "Actions": [
+        "Microsoft.Compute/*/read",
+        "Microsoft.Compute/virtualMachines/start/action",
+        "Microsoft.Compute/virtualMachines/powerOff/action",
+        "Microsoft.Support/*"
+    ],
+    "NotActions": [],
+    "DataActions": [],
+    "NotDataActions": [],
+    "AssignableScopes": [
+        "/subscriptions/d5cb511c-39ab-4f54-a43b-d42c369ff374"
+    ]
+}
